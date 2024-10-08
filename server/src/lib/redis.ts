@@ -6,11 +6,9 @@ const redisClient = createClient({
 	url: env.REDIS_URL,
 });
 
-(async () => {
-	redisClient.on('error', err => logger.error('Redis error:', err));
-	redisClient.on('connect', () => logger.info('Connected to Redis'));
+redisClient.on('error', err => logger.error('Redis error:', err));
+redisClient.on('connect', () => logger.info('Connected to Redis'));
 
-	await redisClient.connect();
-})();
+if (!redisClient.isOpen) redisClient.connect();
 
 export default redisClient;

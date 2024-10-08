@@ -84,11 +84,6 @@ type Recipe = {
 	servings?: string | number;
 	category?: string;
 	cuisine?: string;
-	ingredients: string[] | string[][];
+	ingredients: string[];
 	instructions: string[];
-};
-
-type RecipeJsonResponse = {
-	recipe: Recipe | null;
-	source: 'openai' | 'json-ld' | 'cache' | 'none';
 };

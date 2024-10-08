@@ -107,7 +107,7 @@ async function getRecipeWithOpenAi(page: Page) {
 					servings?: string | number;
 					category?: string;
 					cuisine?: string;
-					ingredients: string[] | string[][];
+					ingredients: string[];
 					instructions: string[]
 				}`,
 			},
@@ -139,22 +139,12 @@ export async function scrapeRecipe(url: string) {
 	const page = await browser.newPage();
 	await page.setViewport({ width: 1920, height: 1080 });
 	await page.goto(url, { waitUntil: 'networkidle2' });
-	let source: 'json-ld' | 'openai' | 'none' = 'none';
+
 	let recipe: Recipe | null = await getRecipeWithJsonLd(page);
 
-	if (!recipe) {
-		recipe = await getRecipeWithOpenAi(page);
-
-		if (!recipe) {
-			recipe = null;
-			source = 'none';
-		} else source = 'openai';
-	} else source = 'json-ld';
+	if (!recipe) recipe = await getRecipeWithOpenAi(page);
 
 	await browser.close();
 
-	return {
-		recipe,
-		source,
-	};
+	return recipe;
 }
