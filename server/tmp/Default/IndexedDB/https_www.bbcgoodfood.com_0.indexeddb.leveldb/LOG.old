@@ -1,4 +1,0 @@
-2024/10/04-20:19:42.061 8503 Reusing MANIFEST /Users/roy/Documents/Code/sort-my-life-out/server/tmp/Default/IndexedDB/https_www.bbcgoodfood.com_0.indexeddb.leveldb/MANIFEST-000001
-2024/10/04-20:19:42.061 8503 Recovering log #3
-2024/10/04-20:19:42.062 8503 Reusing old log /Users/roy/Documents/Code/sort-my-life-out/server/tmp/Default/IndexedDB/https_www.bbcgoodfood.com_0.indexeddb.leveldb/000003.log 
-2024/10/04-20:24:51.714 f703 Manual compaction at level-0 from '\x00\x02\x00\x00\x00' @ 72057594037927935 : 1 .. '\x00\x03\x00\x00\x00' @ 0 : 0; will stop at (end)

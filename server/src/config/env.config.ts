@@ -9,12 +9,12 @@ const stringBoolean = z.coerce
 	.default('false');
 
 const schema = z.object({
-	// DB_HOST: z.string().default('localhost'),
-	// DB_USER: z.string(),
-	// DB_PASSWORD: z.string(),
-	// DB_NAME: z.string(),
-	// DB_PORT: z.coerce.number().int().positive().default(5432),
-	// DATABASE_URL: z.string().url(),
+	DB_HOST: z.string().default('localhost'),
+	DB_USER: z.string(),
+	DB_PASSWORD: z.string(),
+	DB_NAME: z.string(),
+	DB_PORT: z.coerce.number().int().positive().default(5432),
+	DATABASE_URL: z.string().url(),
 	PORT: z.coerce.number().int().positive().default(8000),
 	NODE_ENV: z
 		.enum(['development', 'production', 'test'])

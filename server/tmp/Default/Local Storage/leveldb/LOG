@@ -1,5 +1,0 @@
-2024/10/04-20:28:09.629 3903 Reusing MANIFEST /Users/roy/Documents/Code/sort-my-life-out/server/tmp/Default/Local Storage/leveldb/MANIFEST-000001
-2024/10/04-20:28:09.631 3903 Recovering log #6
-2024/10/04-20:28:09.631 3903 Reusing old log /Users/roy/Documents/Code/sort-my-life-out/server/tmp/Default/Local Storage/leveldb/000006.log 
-2024/10/04-20:28:18.367 5d03 Level-0 table #10: started
-2024/10/04-20:28:18.370 5d03 Level-0 table #10: 21633 bytes OK
