@@ -5,14 +5,14 @@ import {
 	ImportRecipeResponse,
 	importRecipeSchema,
 } from '@/schema/recipe.schema';
-import { env } from '@/env.mjs';
+import { env } from '@/config/env.mjs';
 
 export const importRecipeAction = actionClient
 	.schema(importRecipeSchema.shape.request)
 	.action(async ({ parsedInput: { url } }) => {
 		const encodedUrl = encodeURIComponent(url);
 		const response = await fetch(
-			`${env.BASE_API_URL}/recipes/import/${encodedUrl}`
+			`${env.NEXT_PUBLIC_BASE_API_URL}/api/recipes/import/${encodedUrl}`
 		);
 		const recipe: ImportRecipeResponse = await response.json();
 

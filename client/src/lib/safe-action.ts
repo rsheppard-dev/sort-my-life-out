@@ -3,17 +3,16 @@ import {
 	DEFAULT_SERVER_ERROR_MESSAGE,
 } from 'next-safe-action';
 
-class MyCustomError extends Error {}
-
 export const actionClient = createSafeActionClient({
 	// Can also be an async function.
 	handleServerError(e) {
 		// Log to console.
 		console.error('Action error:', e.message);
+		console.error(e);
 
 		// In this case, we can use the 'MyCustomError` class to unmask errors
 		// and return them with their actual messages to the client.
-		if (e instanceof MyCustomError) {
+		if (e instanceof Error) {
 			return e.message;
 		}
 

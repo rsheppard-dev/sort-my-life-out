@@ -1,5 +1,4 @@
 import puppeteer, { Page } from 'puppeteer';
-import type { Recipe, RecipeJsonLd } from '../types/recipe.types';
 import OpenAI from 'openai';
 import env from '../config/env.config';
 import { formatISO8601Duration } from '../lib/utils';

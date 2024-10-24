@@ -1,31 +1,63 @@
 import express from 'express';
-import { recipeRoutes } from './routes';
 import env from './config/env.config';
-import morgan from 'morgan';
 import logger from './lib/logger';
-
-const morganFormat = ':method :url :status :response-time ms';
+import cors, { CorsOptions } from 'cors';
+import sessionFileStore from 'session-file-store';
+import session from 'express-session';
+import cookieParser from 'cookie-parser';
+import formatLogger from './middleware/formatLogger';
+import passport from 'passport';
+import userRoutes from './routes/user.routes';
+import recipeRoutes from './routes/recipe.routes';
+import authRoutes from './routes/auth.routes';
+import errorHandler from './middleware/errorHandler';
 
 const app = express();
 
-app.use(
-	morgan(morganFormat, {
-		stream: {
-			write: message => {
-				const logObject = {
-					method: message.split(' ')[0],
-					url: message.split(' ')[1],
-					status: message.split(' ')[2],
-					responseTime: message.split(' ')[3],
-				};
+const FileStore = sessionFileStore(session);
 
-				logger.info(JSON.stringify(logObject));
-			},
+const allowedOrigins: string[] = [env.ORIGIN];
+
+const corsOptions: CorsOptions = {
+	origin: (
+		origin: string | undefined,
+		callback: (err: Error | null, allow?: boolean) => void
+	) => {
+		if (allowedOrigins.includes(origin || '') || !origin) {
+			callback(null, true);
+		} else {
+			callback(new Error('Not allowed by CORS'));
+		}
+	},
+	credentials: true,
+};
+
+// middleware
+app.use(formatLogger());
+app.use(cors(corsOptions));
+app.use(express.json());
+app.use(cookieParser());
+app.use(
+	session({
+		secret: env.EXPRESS_SESSION_SECRET,
+		saveUninitialized: false,
+		resave: false,
+		cookie: {
+			maxAge: 1000 * 60 * 60 * 24 * 7 * 24,
 		},
+		store: new FileStore(),
 	})
 );
+app.use(passport.initialize());
+app.use(passport.session());
 
+// routes
+app.use('/api/users', userRoutes);
 app.use('/api/recipes', recipeRoutes);
+app.use('/api/auth', authRoutes);
+
+// error handler
+app.use(errorHandler);
 
 const PORT = env.PORT;
 

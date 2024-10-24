@@ -11,3 +11,17 @@ export {
 } from './recipeCategoriesToRecipes.schema';
 export { default as recipes, recipesRelations } from './recipes.schema';
 export { default as users, usersRelations } from './users.schema';
+export {
+	default as usersToFamilies,
+	usersToFamiliesRelations,
+} from './usersToFamilies.schema';
+export { default as accounts, accountsRelations } from './accounts.schema';
+export {
+	default as ingredients,
+	ingredientsRelations,
+} from './ingredients.schema';
+export {
+	default as ingredientsToRecipes,
+	ingredientsToRecipesRelations,
+} from './ingredientsToRecipes.schema';
+export { default as ingredientCategories } from './enums/ingredientCategories.enum';

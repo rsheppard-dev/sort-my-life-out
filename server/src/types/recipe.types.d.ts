@@ -1,8 +1,3 @@
-import { z } from 'zod';
-import { importRecipeDto } from '../dtos/recipe.dtos';
-
-type ImportRecipeParams = z.infer<typeof importRecipeDto>['params'];
-
 type ImageObject = {
 	'@type': 'ImageObject';
 	url: string;

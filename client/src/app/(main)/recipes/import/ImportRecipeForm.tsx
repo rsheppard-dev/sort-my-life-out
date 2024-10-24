@@ -32,8 +32,6 @@ export default function ImportRecipeForm() {
 				title: 'Success 🎉',
 				description: data?.success,
 			});
-
-			console.log(data?.recipe);
 		},
 		onError: ({ error }) => {
 			toast({

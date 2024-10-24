@@ -1,7 +1,7 @@
 import { cn } from '@/lib/utils';
 import { Slot } from '@radix-ui/react-slot';
 import { cva, VariantProps } from 'class-variance-authority';
-import React from 'react';
+import React, { type JSX } from 'react';
 
 const headingVariants = cva('scroll-m-20 tracking-tight', {
 	variants: {

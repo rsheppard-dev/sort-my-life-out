@@ -1,5 +1,5 @@
 import type { Request, Response } from 'express';
-import type { ImportRecipeParams, Recipe } from '../types/recipe.types';
+import { ImportRecipeParams } from '../dtos/recipe.dtos';
 import { scrapeRecipe } from '../services/recipe.services';
 import redisClient from '../lib/redis';
 import logger from '../lib/logger';
