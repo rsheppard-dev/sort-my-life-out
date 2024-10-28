@@ -3,10 +3,13 @@ type ActiveUser = {
 	givenName: string;
 	familyName: string;
 	email: string;
-	cognitoId: string;
+	emailVerified: boolean;
 	dateOfBirth?: Date;
 	picture?: string;
 	isActive: true;
+	isPro: boolean;
+	createdAt: Date;
+	updatedAt: Date;
 };
 
 type InactiveUser = {
@@ -16,6 +19,8 @@ type InactiveUser = {
 	dateOfBirth?: Date;
 	picture?: string;
 	isActive: false;
+	createdAt: Date;
+	updatedAt: Date;
 };
 
 type User = ActiveUser | InactiveUser;

@@ -2,7 +2,6 @@ import express from 'express';
 import env from './config/env.config';
 import logger from './lib/logger';
 import cors, { CorsOptions } from 'cors';
-import sessionFileStore from 'session-file-store';
 import session from 'express-session';
 import cookieParser from 'cookie-parser';
 import formatLogger from './middleware/formatLogger';
@@ -11,10 +10,9 @@ import userRoutes from './routes/user.routes';
 import recipeRoutes from './routes/recipe.routes';
 import authRoutes from './routes/auth.routes';
 import errorHandler from './middleware/errorHandler';
+import { redisStore } from './lib/redis';
 
 const app = express();
-
-const FileStore = sessionFileStore(session);
 
 const allowedOrigins: string[] = [env.ORIGIN];
 
@@ -43,9 +41,11 @@ app.use(
 		saveUninitialized: false,
 		resave: false,
 		cookie: {
-			maxAge: 1000 * 60 * 60 * 24 * 7 * 24,
+			maxAge: 1000 * 60 * 60 * 24 * 7, // 1 week
+			httpOnly: true,
+			secure: env.NODE_ENV === 'production',
 		},
-		store: new FileStore(),
+		store: redisStore,
 	})
 );
 app.use(passport.initialize());

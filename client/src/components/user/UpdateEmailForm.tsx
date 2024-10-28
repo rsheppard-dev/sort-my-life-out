@@ -15,20 +15,15 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Form, FormField, FormItem, FormLabel, FormMessage } from '../ui/form';
 
-const user = {
-	userAttributes: {
-		email: 'rsheppard83@gmail.com',
-		givenName: 'Roy',
-		familyName: 'Sheppard',
-		picture: 'https://www.gravatar.com/avatar/205e460b479e2e5b48aec07710c08d50',
-	},
+type Props = {
+	user: UserSession;
 };
 
-export default function UpdateEmailForm() {
+export default function UpdateEmailForm({ user }: Props) {
 	const form = useForm<UpdateEmail>({
 		resolver: zodResolver(updateEmailSchema),
 		defaultValues: {
-			email: user?.userAttributes.email,
+			email: '',
 		},
 	});
 
@@ -51,7 +46,7 @@ export default function UpdateEmailForm() {
 					<form onSubmit={form.handleSubmit(onSubmit)} className='grid gap-4'>
 						<div className='grid gap-2'>
 							<FormLabel>Current Email</FormLabel>
-							<Input disabled={true} value={user?.userAttributes.email} />
+							<Input disabled={true} value={user.email} />
 						</div>
 						<FormField
 							control={form.control}

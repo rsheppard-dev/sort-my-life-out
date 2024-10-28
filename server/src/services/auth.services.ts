@@ -16,6 +16,8 @@ import { findUserByEmail, updateUser } from './user.services';
 import NotFoundError from '../errors/NotFoundError';
 import BadRequestError from '../errors/BadRequestError';
 import DatabaseError from '../errors/DatabaseError';
+import AuthenticationError from '../errors/AuthenticationError';
+import { Profile } from 'passport-google-oauth20';
 
 export async function signUpMainUser({ password, ...values }: SignUpDtoBody) {
 	const hashedPassword = await hashPassword(password);
@@ -93,11 +95,83 @@ export async function verifyEmail({ email, code }: VerifyEmailDtoBody) {
 }
 
 export async function login({ email, password }: LoginDtoBody) {
+	const message = 'Email or password is incorrect.';
 	const user = await findUserByEmail(email);
 
-	if (!user || !user.account || !user.account.password) return null;
+	if (!user || !user.account || !user.account.password) {
+		throw new AuthenticationError(message);
+	}
 
 	const verified = await verifyPassword(password, user.account.password);
 
-	return verified ? user : null;
+	if (!verified) {
+		throw new AuthenticationError(message);
+	}
+
+	return user;
+}
+
+export async function findOrCreateGoogleMainUser(data: Profile) {
+	const {
+		given_name: givenName,
+		family_name: familyName,
+		email,
+		email_verified: emailVerified,
+		picture,
+	} = data._json;
+
+	if (!email) {
+		throw new BadRequestError('No email address found in Google profile.');
+	}
+
+	if (!givenName || !familyName) {
+		throw new BadRequestError('No name found in Google profile.');
+	}
+
+	const existingUser = await findUserByEmail(email);
+
+	// user exists but has no googleId
+	if (existingUser?.account && !existingUser.account.googleId) {
+		existingUser.account.googleId = data.id;
+		existingUser.picture ??= picture ?? null;
+		await updateUser(existingUser as SelectUser & { account: SelectAccount });
+		// user exists and has googleId that doesn't match the current one
+	} else if (existingUser && existingUser.account?.googleId !== data.id) {
+		throw new BadRequestError('This Google account is already in use.');
+	}
+
+	if (existingUser) {
+		return existingUser;
+	} else {
+		const newUser = await db.transaction(async tx => {
+			const [family] = await tx
+				.insert(families)
+				.values({ name: `${familyName} Family` })
+				.returning();
+			const [user] = await tx
+				.insert(users)
+				.values({
+					givenName,
+					familyName,
+					email,
+					emailVerified,
+					picture,
+				})
+				.returning();
+			await tx.insert(accounts).values({
+				userId: user.id,
+				googleId: data.id,
+			});
+			await tx.insert(usersToFamilies).values({
+				familyId: family.id,
+				userId: user.id,
+			});
+
+			return user;
+		});
+
+		if (!newUser) throw new DatabaseError('Failed to create user.');
+
+		return newUser;
+	}
 }

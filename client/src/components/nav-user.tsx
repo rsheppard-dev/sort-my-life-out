@@ -19,37 +19,35 @@ import {
 	DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import Link from 'next/link';
-import { useAction } from 'next-safe-action/hooks';
-import { logoutAction } from '@/actions/auth.actions';
-
-const user = {
-	name: 'John Doe',
-	userAttributes: {
-		email: 'rsheppard83@gmail.com',
-		picture: 'https://www.gravatar.com/avatar/205e460b479e2e5b48aec07710c08d50',
-		given_name: 'John',
-		family_name: 'Doe',
-	},
-};
+import { logout } from '@/actions/auth.actions';
+import useSession from '@/hooks/useSession';
 
 export function NavUser() {
-	const { execute } = useAction(logoutAction);
+	const { session } = useSession();
+
+	const user = session?.user;
+
+	const initials = user?.name
+		.split(' ')
+		.map(n => n[0])
+		.join('')
+		.toUpperCase();
 	return (
 		<DropdownMenu>
 			<DropdownMenuTrigger className='w-full rounded-md outline-none ring-ring hover:bg-accent focus-visible:ring-2 data-[state=open]:bg-accent'>
 				<div className='flex items-center gap-2 px-2 py-1.5 text-left text-sm transition-all'>
 					<Avatar className='h-7 w-7 rounded-md border'>
 						<AvatarImage
-							src={user?.userAttributes.picture}
+							src={user?.picture}
 							alt={user?.name}
 							className='animate-in fade-in-50 zoom-in-90'
 						/>
-						<AvatarFallback className='rounded-md'>{`${user?.userAttributes?.given_name?.[0]}${user?.userAttributes?.family_name?.[0]}`}</AvatarFallback>
+						<AvatarFallback className='rounded-md'>{initials}</AvatarFallback>
 					</Avatar>
 					<div className='grid flex-1 leading-none'>
 						<div className='font-medium'>{user?.name}</div>
 						<div className='overflow-hidden text-xs text-muted-foreground'>
-							<div className='line-clamp-1'>{user?.userAttributes.email}</div>
+							<div className='line-clamp-1'>{user?.email}</div>
 						</div>
 					</div>
 					<ChevronsUpDown className='ml-auto mr-0.5 h-4 w-4 text-muted-foreground/50' />
@@ -65,18 +63,13 @@ export function NavUser() {
 					<DropdownMenuLabel className='p-0 font-normal'>
 						<div className='flex items-center gap-2 px-1 py-1.5 text-left text-sm transition-all'>
 							<Avatar className='h-7 w-7 rounded-md'>
-								<AvatarImage
-									src={user?.userAttributes.picture}
-									alt={user?.name}
-								/>
-								<AvatarFallback>{`${user?.userAttributes?.given_name?.[0]}${user?.userAttributes?.family_name?.[0]}`}</AvatarFallback>
+								<AvatarImage src={user?.picture} alt={user?.name} />
+								<AvatarFallback>{initials}</AvatarFallback>
 							</Avatar>
 							<div className='grid flex-1'>
 								<div className='font-medium'>{user?.name}</div>
 								<div className='overflow-hidden text-xs text-muted-foreground'>
-									<div className='line-clamp-1'>
-										{user?.userAttributes.email}
-									</div>
+									<div className='line-clamp-1'>{user?.email}</div>
 								</div>
 							</div>
 						</div>
@@ -98,10 +91,14 @@ export function NavUser() {
 					</DropdownMenuItem>
 				</DropdownMenuGroup>
 				<DropdownMenuSeparator />
-				<DropdownMenuItem className='gap-2' onClick={() => execute()}>
-					<LogOut className='h-4 w-4 text-muted-foreground' />
-					Log out
-				</DropdownMenuItem>
+				<form action={logout}>
+					<button className='w-full cursor-pointer'>
+						<DropdownMenuItem className='gap-2'>
+							<LogOut className='h-4 w-4 text-muted-foreground' />
+							Log out
+						</DropdownMenuItem>
+					</button>
+				</form>
 			</DropdownMenuContent>
 		</DropdownMenu>
 	);

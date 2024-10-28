@@ -6,9 +6,9 @@ import type {
 } from '../dtos/auth.schema';
 import logger from '../lib/logger';
 import { signUpMainUser, verifyEmail } from '../services/auth.services';
-import AuthenticationError from '../errors/AuthenticationError';
 import BadRequestError from '../errors/BadRequestError';
 import DatabaseError from '../errors/DatabaseError';
+import env from '../config/env.config';
 
 export async function signUpHandler(
 	req: Request<{}, {}, SignUpDtoBody>,
@@ -30,13 +30,13 @@ export async function verifyEmailHandler(
 ) {
 	const user = await verifyEmail(req.body);
 
-	if (!user) throw new BadRequestError('Invalid verification code.');
+	if (!user.id) throw new BadRequestError('Invalid verification code.');
 
 	logger.info('Email verified successfully.');
 
 	req.logIn(
 		{
-			id: user.id?.toString() ?? '',
+			id: user.id,
 			name: `${user.givenName} ${user.familyName}`,
 			email: user.email as string,
 			picture: user.picture ?? undefined,
@@ -52,33 +52,21 @@ export async function verifyEmailHandler(
 }
 
 export async function getSessionHandler(req: Request, res: Response) {
-	try {
-		logger.info(req.user);
-		logger.info(req.isAuthenticated());
-		res.send(req.user);
-	} catch (err) {
-		const error = err as Error;
-
-		logger.error('An error occurred while getting session.', error);
-
-		res.status(500).send({
-			message: error.message ?? 'An error occurred while getting session.',
-		});
-		return;
-	}
+	res.send({
+		cookie: req.session.cookie,
+		user: req.user,
+		isAuthenticated: req.isAuthenticated(),
+	});
 }
 
 export async function loginHandler(
 	req: Request<{}, {}, LoginDtoBody>,
 	res: Response
 ) {
-	const user = req.user;
-
-	if (!user) {
-		throw new AuthenticationError('User not found.');
-	}
-
-	res.status(200).send(user);
+	res.status(200).send({
+		cookie: req.session.cookie,
+		user: req.user,
+	});
 }
 
 export async function logoutHandler(req: Request, res: Response) {
@@ -86,12 +74,40 @@ export async function logoutHandler(req: Request, res: Response) {
 		if (err) {
 			logger.error('An error occurred while logging out.', err);
 
-			res.status(500).send({
+			return res.status(500).send({
 				message: 'An error occurred while logging out.',
 			});
-			return;
 		}
 
-		res.send({ message: 'Logged out successfully.' });
+		req.session.destroy(err => {
+			if (err) {
+				logger.error('An error occurred while destroying the session.', err);
+
+				return res.status(500).send({
+					message: 'An error occurred while destroying the session.',
+				});
+			}
+
+			res.clearCookie('connect.sid');
+			res.send({ message: 'Logged out successfully.' });
+		});
 	});
+}
+
+export async function updateSessionHandler(req: Request, res: Response) {
+	req.session.cookie.expires = new Date(Date.now() + 1000 * 60 * 60 * 24 * 7); // 1 week
+	req.session.save(err => {
+		if (err) {
+			logger.error('An error occurred while saving the session.', err);
+			return res.status(500).send({
+				message: 'An error occurred while saving the session.',
+			});
+		}
+
+		res.send({ message: 'Session updated successfully.' });
+	});
+}
+
+export async function loginWithOAuthHandler(req: Request, res: Response) {
+	res.redirect(env.ORIGIN + '/dashboard');
 }

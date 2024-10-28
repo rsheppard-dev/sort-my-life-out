@@ -1,15 +1,30 @@
 import { relations } from 'drizzle-orm';
-import { integer, pgTable, serial, varchar } from 'drizzle-orm/pg-core';
+import {
+	integer,
+	pgTable,
+	serial,
+	uniqueIndex,
+	varchar,
+} from 'drizzle-orm/pg-core';
 import users from './users.schema';
 import { createInsertSchema, createSelectSchema } from 'drizzle-zod';
 import { z } from 'zod';
 
-const accounts = pgTable('accounts', {
-	id: serial('id').primaryKey().notNull(),
-	userId: serial('user_id').notNull(),
-	password: varchar('password', { length: 255 }),
-	verificationCode: integer('verification_code'),
-});
+const accounts = pgTable(
+	'accounts',
+	{
+		id: serial('id').primaryKey().notNull(),
+		userId: serial('user_id').notNull(),
+		password: varchar('password', { length: 255 }),
+		googleId: varchar('google_id', { length: 255 }),
+		verificationCode: integer('verification_code'),
+	},
+	table => {
+		return {
+			googleIdIndex: uniqueIndex('googleId_idx').on(table.googleId),
+		};
+	}
+);
 
 export const accountsRelations = relations(accounts, ({ one }) => ({
 	user: one(users, {

@@ -2,16 +2,24 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { CircleX } from 'lucide-react';
 
 type Props = {
-	result: {
-		data?: {
-			message?: string;
-			success?: boolean;
-		};
-		serverError?: string;
-		fetchError?: string;
-		validationErrors?: Record<string, string[] | undefined> | undefined;
-	};
-	title?: string;
+	title: string;
+
+	result:
+		| {
+				message: string;
+
+				errors?: Record<string, string[]>;
+
+				success: boolean;
+		  }
+		| {
+				message: unknown;
+
+				success: boolean;
+
+				errors?: undefined;
+		  }
+		| undefined;
 };
 
 function ErrorAlert({
@@ -40,26 +48,24 @@ function SuccessAlert({ message }: { message: string }) {
 }
 
 export default function DisplayServerActionResult({ result, title }: Props) {
-	const { data, serverError, fetchError, validationErrors } = result;
-
+	const { success } = result ?? {};
 	return (
 		<>
-			{data?.message ? <SuccessAlert message={data.message} /> : null}
+			{success && typeof result?.message === 'string' ? (
+				<SuccessAlert message={result.message} />
+			) : null}
 
-			{serverError ? <ErrorAlert message={serverError} title={title} /> : null}
+			{!success && typeof result?.message === 'string' ? (
+				<ErrorAlert message={result.message} title={title} />
+			) : null}
 
-			{fetchError ? <ErrorAlert message={fetchError} title={title} /> : null}
-
-			{validationErrors ? (
+			{result?.errors ? (
 				<ul className='my-2 text-red-500'>
-					{Object.keys(validationErrors).map(key => (
-						<li key={key}>
-							{`${key}: ${
-								validationErrors &&
-								validationErrors[key as keyof typeof validationErrors]
-							}`}
-						</li>
-					))}
+					{Object.entries(result.errors).map(([key, errors]) =>
+						errors.map((error, index) => (
+							<li key={`${key}-${index}`}>{error}</li>
+						))
+					)}
 				</ul>
 			) : null}
 		</>

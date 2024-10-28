@@ -9,12 +9,15 @@ import { Form, FormField, FormItem, FormLabel, FormMessage } from '../ui/form';
 import { useForm } from 'react-hook-form';
 import { Login, loginSchema } from '@/schema/auth.schema';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { GoogleOriginal } from 'devicons-react';
-import { useAction } from 'next-safe-action/hooks';
-import { loginAction } from '@/actions/auth.actions';
+import { useActionState, useRef } from 'react';
+import { login } from '@/actions/auth.actions';
 import DisplayServerActionResult from '../DisplayServerActionResult';
+import LoginWithGoogle from './LoginWithGoogle';
 
 export default function LoginForm() {
+	const [state, loginAction] = useActionState(login, undefined);
+	const formRef = useRef<HTMLFormElement>(null);
+
 	const form = useForm<Login>({
 		resolver: zodResolver(loginSchema),
 		defaultValues: {
@@ -23,11 +26,7 @@ export default function LoginForm() {
 		},
 	});
 
-	const { isExecuting, execute, result } = useAction(loginAction);
-
-	async function onSubmit(values: Login) {
-		execute(values);
-	}
+	const { isSubmitting } = form.formState;
 
 	return (
 		<div className='w-full lg:grid lg:min-h-[600px] lg:grid-cols-2 xl:min-h-[800px]'>
@@ -35,14 +34,21 @@ export default function LoginForm() {
 				<div className='mx-auto grid w-[350px] gap-6'>
 					<div className='grid gap-2 text-center'>
 						<h1 className='text-3xl font-bold'>Login</h1>
-						<DisplayServerActionResult result={result} title={'Login Failed'} />
+						<DisplayServerActionResult
+							result={state}
+							title={'Login Unsuccessful'}
+						/>
 						<p className='text-balance text-muted-foreground'>
 							Enter your email below to login to your account
 						</p>
 					</div>
 					<div>
 						<Form {...form}>
-							<form onSubmit={form.handleSubmit(onSubmit)}>
+							<form
+								action={loginAction}
+								ref={formRef}
+								onSubmit={() => formRef.current?.requestSubmit()}
+							>
 								<div className='grid gap-4'>
 									<FormField
 										control={form.control}
@@ -54,7 +60,7 @@ export default function LoginForm() {
 													type='email'
 													required
 													{...field}
-													disabled={isExecuting}
+													disabled={isSubmitting}
 												/>
 												<FormMessage />
 											</FormItem>
@@ -79,7 +85,7 @@ export default function LoginForm() {
 													type='password'
 													required
 													{...field}
-													disabled={isExecuting}
+													disabled={isSubmitting}
 												/>
 												<FormMessage />
 											</FormItem>
@@ -89,7 +95,7 @@ export default function LoginForm() {
 									<Button
 										type='submit'
 										className='w-full'
-										disabled={isExecuting}
+										disabled={isSubmitting}
 									>
 										Login
 									</Button>
@@ -97,13 +103,7 @@ export default function LoginForm() {
 							</form>
 						</Form>
 					</div>
-					<Button
-						variant='outline'
-						className='flex gap-2'
-						disabled={isExecuting}
-					>
-						<GoogleOriginal /> Login with Google
-					</Button>
+					<LoginWithGoogle isSubmitting={isSubmitting} />
 					<div className='mt-4 text-center text-sm'>
 						Don&apos;t have an account?{' '}
 						<Link href='/signup' className='underline'>

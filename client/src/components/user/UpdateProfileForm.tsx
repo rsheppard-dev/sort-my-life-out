@@ -31,25 +31,17 @@ import { updateProfileAction } from '@/actions/user.actions';
 import { toast } from '@/hooks/use-toast';
 import { getErrorMessage } from '@/lib/getErrorMessage';
 
-const user = {
-	userAttributes: {
-		email: 'rsheppard83@gmail.com',
-		given_name: 'Roy',
-		family_name: 'Sheppard',
-		birthdate: '1983-06-30',
-		picture: 'https://www.gravatar.com/avatar/205e460b479e2e5b48aec07710c08d50',
-	},
+type Props = {
+	user: UserSession;
 };
 
-export default function UpdateProfileForm() {
+export default function UpdateProfileForm({ user }: Props) {
 	const form = useForm<UpdateProfile>({
 		resolver: zodResolver(updateProfileSchema),
 		defaultValues: {
-			givenName: user?.userAttributes.given_name ?? '',
-			familyName: user?.userAttributes.family_name ?? '',
-			dateOfBirth: user?.userAttributes?.birthdate
-				? new Date(user.userAttributes.birthdate)
-				: undefined,
+			givenName: user.name.split(' ')[0],
+			familyName: user.name.split(' ')[1],
+			dateOfBirth: undefined,
 		},
 	});
 
@@ -96,12 +88,7 @@ export default function UpdateProfileForm() {
 							render={({ field }) => (
 								<FormItem className='grid gap-2'>
 									<FormLabel>First name</FormLabel>
-									<Input
-										required
-										{...field}
-										disabled={isSubmitting}
-										defaultValue={user?.userAttributes.given_name}
-									/>
+									<Input required {...field} disabled={isSubmitting} />
 									<FormMessage />
 								</FormItem>
 							)}
@@ -112,12 +99,7 @@ export default function UpdateProfileForm() {
 							render={({ field }) => (
 								<FormItem className='grid gap-2'>
 									<FormLabel>Last name</FormLabel>
-									<Input
-										required
-										{...field}
-										disabled={isSubmitting}
-										defaultValue={user?.userAttributes.family_name}
-									/>
+									<Input required {...field} disabled={isSubmitting} />
 									<FormMessage />
 								</FormItem>
 							)}

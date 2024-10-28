@@ -14,20 +14,28 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import UpdateProfileForm from '@/components/user/UpdateProfileForm';
 import UpdateEmailForm from '@/components/user/UpdateEmailForm';
+import { getSession } from '@/actions/auth.actions';
 
-export default function page() {
+export default async function profilePage() {
+	const user = (await getSession()).user;
+
+	const initials = user.name
+		.split(' ')
+		.map(n => n[0])
+		.join('')
+		.toUpperCase();
 	return (
 		<section>
 			<div className='flex gap-4 items-center mb-4'>
 				<Avatar className='h-20 w-20'>
-					<AvatarImage />
-					<AvatarFallback className='text-4xl font-bold'>RS</AvatarFallback>
+					<AvatarImage src={user?.picture} alt={user?.name} />
+					<AvatarFallback className='text-4xl font-bold'>
+						{initials}
+					</AvatarFallback>
 				</Avatar>
 				<div>
-					<h1 className='font-bold text-2xl'>Roy Sheppard</h1>
-					<span className='text-muted-foreground'>
-						info@roysheppard.digital
-					</span>
+					<h1 className='font-bold text-2xl'>{user.name}</h1>
+					<span className='text-muted-foreground'>{user.email}</span>
 				</div>
 			</div>
 			<Separator className='mb-4' />
@@ -45,10 +53,10 @@ export default function page() {
 				</TabsList>
 				<div>
 					<TabsContent value='profile'>
-						<UpdateProfileForm />
+						<UpdateProfileForm user={user} />
 					</TabsContent>
 					<TabsContent value='email'>
-						<UpdateEmailForm />
+						<UpdateEmailForm user={user} />
 					</TabsContent>
 					<TabsContent value='password'>
 						<Card>
